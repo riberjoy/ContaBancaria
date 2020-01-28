@@ -14,14 +14,14 @@ USE ContaBancaria
 
 IF OBJECT_ID (N'dbo.Conta', N'FN') IS NULL   
 CREATE  TABLE Conta(
-		Num_Conta		int				identity,
+		Num_ContaID		int				identity,
+		Num_Conta		int				NOT NULL,
 		Num_Agencia		int				NOT NULL,
-		Nom_banco		varchar			NOT NULL,
-		Ind_TipoConta	char(1)			NOT NULL,
+		Nom_banco		varchar(100)	NOT NULL,
 		Dat_AbertConta	dateTime		NOT NULL,
-		Vlr_Saldo		money				NULL,
+		Vlr_Saldo		money			NOT NULL,
 		
-		CONSTRAINT PK_Conta PRIMARY KEY (Num_Conta),
+		CONSTRAINT PK_Conta PRIMARY KEY (Num_ContaID),
 )
 
 IF OBJECT_ID (N'dbo.Cliente', N'FN') IS NULL 
@@ -33,10 +33,10 @@ CREATE  TABLE Cliente(
 		Ind_Sexo		char(1)			NOT NULL,
 		Num_Telefone	varchar(8)			NULL,
 		Num_Celular		varchar(9)			NULL,
-		Num_Conta		int					NULL,
+		Num_ContaID		int					NULL,
 		
 		CONSTRAINT PK_Cliente PRIMARY KEY (Num_Cliente),
-		CONSTRAINT FK_Conta FOREIGN KEY (Num_Conta) REFERENCES Conta(Num_Conta)
+		CONSTRAINT FK_ContaID FOREIGN KEY (Num_ContaID) REFERENCES Conta(Num_ContaID)
 )
 
 IF OBJECT_ID (N'dbo.Operacao', N'FN') IS NULL 

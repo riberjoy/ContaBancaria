@@ -3,10 +3,10 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[InsContaCl
 GO 
 
 CREATE PROCEDURE [dbo].[InsContaCliente](
+	@Num_Conta			int,
 	@Num_Agencia		int,
-	@Nom_banco			varchar,
-	@Ind_TipoConta		char(1),
-	@Dat_AbertConta		dateTime,
+	@Nom_banco			varchar(100),
+	@Dat_AbertConta		varchar(11),
 	@Vlr_Saldo			money
 	)
 
@@ -24,13 +24,21 @@ CREATE PROCEDURE [dbo].[InsContaCliente](
 	*/
 
 	BEGIN
-		INSERT INTO Conta(Num_Agencia, Nom_Banco, Ind_TipoConta, Dat_AbertConta,
-				Vlr_Saldo)
-			VALUES ( @Num_Agencia, @Nom_banco, @Ind_TipoConta, @Dat_AbertConta,
-				@Vlr_Saldo
-		)
-		RETURN 0
-
+		IF (SELECT COUNT(*) FROM Conta WHERE Num_Conta = @Num_Conta) = 0
+			BEGIN
+				PRINT 'xxx'
+				INSERT INTO Conta(Num_Conta,Num_Agencia, Nom_banco, Dat_AbertConta,
+						Vlr_Saldo)
+					VALUES ( @Num_Conta, @Num_Agencia, @Nom_banco, 
+						CONVERT(date, @Dat_AbertConta), @Vlr_Saldo
+				)
+				RETURN 0
+			END
+		ELSE
+			BEGIN
+				PRINT 'ERRO AO INSERIR'
+				RETURN 3
+			END
 	END
 GO
 
@@ -43,10 +51,6 @@ GO
 
 CREATE PROCEDURE [dbo].[AltContaCliente](
 	@Num_Conta			int,
-	@Num_Agencia		int,
-	@Nom_banco			varchar,
-	@Ind_TipoConta		char(1),
-	@Dat_AbertConta		dateTime,
 	@Vlr_Saldo			money
 	)
 
@@ -65,11 +69,7 @@ CREATE PROCEDURE [dbo].[AltContaCliente](
 
 	BEGIN
 		UPDATE  Conta 
-			SET Conta.Num_Agencia = @Num_Agencia,	
-				Conta.Nom_banco = @Nom_banco,		
-				Conta.Ind_TipoConta	= @Ind_TipoConta,
-				Conta.Dat_AbertConta = @Dat_AbertConta,	 
-				Conta.Vlr_Saldo	= @Vlr_Saldo
+			SET Conta.Vlr_Saldo	= @Vlr_Saldo
 			WHERE Conta.Num_Conta = @Num_Conta
 		RETURN 0
 	END
@@ -112,8 +112,8 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[SelContaCl
 	DROP PROCEDURE [dbo].[SelContaCliente] 
 GO 
 
-CREATE PROCEDURE [dbo].[SelContaCliente](
-	@Num_Conta	int )
+CREATE PROCEDURE [dbo].[SelContaCliente] (
+	@Num_Conta		int)
 
 	AS
 	/*
@@ -129,17 +129,27 @@ CREATE PROCEDURE [dbo].[SelContaCliente](
 	*/
 
 	BEGIN
-		BEGIN
-			SELECT 
-				Num_Conta,		
-				Num_Agencia,
-				Nom_banco,
-				Ind_TipoConta,
-				Dat_AbertConta,
-				Vlr_Saldo
-			FROM Conta WITH(NOLOCK)
-			WHERE Conta.Num_Conta = @Num_Conta
-		END
+		IF @Num_Conta = 0
+			BEGIN
+				SELECT 
+					Num_Conta,		
+					Num_Agencia,
+					Nom_banco,
+					Dat_AbertConta,
+					Vlr_Saldo
+				FROM Conta WITH(NOLOCK)
+			END
+		ELSE
+			BEGIN
+				SELECT 
+					Num_Conta,		
+					Num_Agencia,
+					Nom_banco,
+					Dat_AbertConta,
+					Vlr_Saldo
+				FROM Conta WITH(NOLOCK)
+				WHERE @Num_Conta = Num_Conta
+			END
 		RETURN 0
 	END
 GO
