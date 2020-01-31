@@ -36,7 +36,7 @@ CREATE PROCEDURE [dbo].[InsContaCliente](
 			END
 		ELSE
 			BEGIN
-				PRINT 'ERRO AO INSERIR'
+				PRINT ''
 				RETURN 3
 			END
 	END

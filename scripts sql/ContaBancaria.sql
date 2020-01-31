@@ -21,7 +21,7 @@ CREATE  TABLE Conta(
 		Dat_AbertConta	dateTime		NOT NULL,
 		Vlr_Saldo		money			NOT NULL,
 		
-		CONSTRAINT PK_Conta PRIMARY KEY (Num_ContaID),
+		CONSTRAINT PK_Num_ContaID PRIMARY KEY (Num_ContaID),
 )
 
 IF OBJECT_ID (N'dbo.Cliente', N'FN') IS NULL 
@@ -35,8 +35,8 @@ CREATE  TABLE Cliente(
 		Num_Celular		varchar(9)			NULL,
 		Num_ContaID		int					NULL,
 		
-		CONSTRAINT PK_Cliente PRIMARY KEY (Num_Cliente),
-		CONSTRAINT FK_ContaID FOREIGN KEY (Num_ContaID) REFERENCES Conta(Num_ContaID)
+		CONSTRAINT PK_Num_Cliente PRIMARY KEY (Num_Cliente),
+		CONSTRAINT FK_Num_ContaID FOREIGN KEY (Num_ContaID) REFERENCES Conta(Num_ContaID)
 )
 
 IF OBJECT_ID (N'dbo.Operacao', N'FN') IS NULL 
@@ -48,6 +48,6 @@ CREATE  TABLE  Operacao(
 		Num_Conta2		int					NULL,
 		Num_Cliente		int				NOT NULL,
 
-		CONSTRAINT PK_Operacao PRIMARY KEY (Num_Operacao),
-		CONSTRAINT FK_Cliente FOREIGN KEY (Num_Cliente) REFERENCES Cliente(Num_Cliente)
+		CONSTRAINT PK_Num_Operacao PRIMARY KEY (Num_Operacao),
+		CONSTRAINT FK_Num_Cliente FOREIGN KEY (Num_Cliente) REFERENCES Cliente(Num_Cliente)
 )

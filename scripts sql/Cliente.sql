@@ -26,11 +26,18 @@ CREATE PROCEDURE [dbo].[InsCliente](
 	*/
 
 	BEGIN 
-		INSERT  INTO Cliente (Nom_Cliente, Dat_Nasc, Num_Cpf, Ind_Sexo, 
-				Num_Telefone, Num_Celular, Num_Conta)
-			VALUES (@Nom_Cliente, @Dat_Nasc, @Num_Cpf, @Ind_Sexo, 
-				@Num_Telefone, @Num_Clelular, @Num_Conta )
-		RETURN 0
+		IF (SELECT COUNT(*) FROM Cliente WHERE Num_Cpf = @Num_Cpf) = 0
+			BEGIN
+				INSERT  INTO Cliente (Nom_Cliente, Dat_Nasc, Num_Cpf, Ind_Sexo, 
+						Num_Telefone, Num_Celular, Num_ContaID)
+					VALUES (@Nom_Cliente, @Dat_Nasc, @Num_Cpf, @Ind_Sexo, 
+						@Num_Telefone, @Num_Clelular, (SELECT Num_ContaID FROM Conta WHERE Num_Conta = @Num_Conta) )
+				RETURN 0
+			END
+		ELSE
+			BEGIN
+				PRINT 'Cliente não pode ser cadastrado'
+			END
 	END 
 GO
 
@@ -41,10 +48,9 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[AltCliente
 GO 
 
 CREATE PROCEDURE [dbo].[AltCliente](
-	@Num_Cliente	int,
 	@Nom_Cliente	varchar(150),
 	@Dat_Nasc		datetime,
-	@Num_Cpf		varchar(11),
+	@Num_Cpf		varchar(12),
 	@Ind_Sexo		char(1),
 	@Num_Telefone	varchar(8),
 	@Num_Celular	varchar(9),
@@ -68,12 +74,11 @@ CREATE PROCEDURE [dbo].[AltCliente](
 		UPDATE  Cliente 
 			SET Cliente.Nom_Cliente = @Nom_Cliente, 
 				Cliente.Dat_Nasc = @Dat_Nasc,
-				Cliente.Num_Cpf = @Num_Cpf, 
 				Cliente.Ind_Sexo = @Ind_Sexo, 
 				Cliente.Num_Telefone = @Num_Telefone, 
 				Cliente.Num_Celular =  @Num_Celular,
-				Cliente.Num_Conta = @Num_Conta 
-			WHERE Cliente.Num_Cliente = @Num_Cliente
+				Cliente.Num_ContaID = (SELECT Num_ContaID FROM Conta WHERE Num_Conta = @Num_Conta)
+			WHERE Cliente.Num_Cpf = @Num_Cpf
 		RETURN 0
 	END 
 GO
@@ -84,7 +89,7 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[DelCliente
 GO 
 
 CREATE PROCEDURE [dbo].[DelCliente](
-	@Num_Cliente	int )
+	@Num_Cpf	varchar(11))
 
 	AS
 	/*
@@ -101,7 +106,7 @@ CREATE PROCEDURE [dbo].[DelCliente](
 
 	BEGIN
 		DELETE FROM Cliente 
-			WHERE Cliente.Num_Cliente = @Num_Cliente
+			WHERE Cliente.Num_Cpf = @Num_Cpf
 		RETURN 0
 	END
 GO
@@ -114,7 +119,7 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[SelCliente
 GO 
 
 CREATE PROCEDURE [dbo].[SelCliente](
-	@Num_Cliente	int )
+	@Num_Cpf	varchar(11) )
 
 	AS
 	/*
@@ -130,7 +135,7 @@ CREATE PROCEDURE [dbo].[SelCliente](
 	*/
 
 	BEGIN
-		IF @Num_Cliente = 0
+		IF @Num_Cpf = '0'
 			BEGIN
 				SELECT 
 					Nom_Cliente,
@@ -139,7 +144,7 @@ CREATE PROCEDURE [dbo].[SelCliente](
 					Ind_Sexo, 
 					Num_Telefone, 
 					Num_Celular,
-					Num_Conta 
+					Num_ContaID 
 				FROM Cliente WITH(NOLOCK)
 			END
 		ELSE
@@ -151,9 +156,9 @@ CREATE PROCEDURE [dbo].[SelCliente](
 					Ind_Sexo, 
 					Num_Telefone, 
 					Num_Celular,
-					Num_Conta 
+					Num_ContaID 
 				FROM Cliente cl WITH(NOLOCK)
-				WHERE cl.Num_Cliente = @Num_Cliente
+				WHERE cl.Num_Cpf = @Num_Cpf
 			END
 
 		RETURN 0

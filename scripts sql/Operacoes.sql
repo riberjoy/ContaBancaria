@@ -4,7 +4,7 @@ GO
 
 CREATE PROCEDURE [dbo].[InsSaque](
 	@Vlr_Operacao	money,		
-	@Num_Cliente	int)
+	@Num_Cpf		varchar(11))
 
 	AS
 
@@ -27,37 +27,32 @@ CREATE PROCEDURE [dbo].[InsSaque](
 							5 - Extrato
 	*/
 
-	BEGIN 
+	BEGIN	
 		DECLARE @valorEmConta	money
 		SET @valorEmConta = CASE WHEN (SELECT Vlr_Saldo 
 									FROM Conta ct WITH(NOLOCK) 
 									INNER JOIN Cliente cl 
-									ON cl.Num_Cliente = @Num_Cliente) >= 
+									ON cl.Num_Cpf = @Num_Cpf) >= 
 									@Vlr_Operacao THEN (SELECT Vlr_Saldo 
 															FROM Conta ct WITH(NOLOCK) 
 															INNER JOIN Cliente cl 
-															ON cl.Num_Cliente = @Num_Cliente) ELSE NULL END
+															ON cl.Num_Cpf = @Num_Cpf) ELSE 0 END
 
-		IF @valorEmConta <> NULL			
+		IF @valorEmConta > 0			
 			BEGIN
 				INSERT INTO Operacao( Ind_Operacao, Vlr_Operacao,
 						Dat_Operacao, Num_Conta2, Num_Cliente)
-					VALUES ('1', @Vlr_Operacao, GETDATE(), NULL, @Num_Cliente)
+					VALUES ('1', @Vlr_Operacao, GETDATE(), NULL, @Num_Cpf)
 
 				UPDATE  Conta
 					SET Conta.Vlr_Saldo	= (@valorEmConta - @Vlr_Operacao)
 					WHERE Conta.Num_Conta = (SELECT Num_Conta 
 												FROM Cliente cl WITH(NOLOCK)
-												WHERE cl.Num_Cliente = @Num_Cliente)
+												WHERE cl.Num_Cpf = @Num_Cpf)
 
 				RETURN 0
 			END
-		ELSE
-			BEGIN
-				RETURN 2
-			END
-
-	END 
+	END
 GO
 
 
